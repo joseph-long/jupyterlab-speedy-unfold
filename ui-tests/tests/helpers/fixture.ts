@@ -122,3 +122,26 @@ export function cleanupIsolatedFixtureRoot(rootName: string): void {
   cleanupTargets.delete(rootDir);
   fs.rmSync(rootDir, { recursive: true, force: true });
 }
+
+export function fixtureAbsolutePath(
+  rootName: string,
+  relativePath = ''
+): string {
+  const rootDir = path.join(SCRATCH_ROOT, rootName);
+  return relativePath ? path.join(rootDir, relativePath) : rootDir;
+}
+
+export function createSymlinkInFixture(
+  rootName: string,
+  targetRelative: string,
+  linkRelative: string,
+  type: 'dir' | 'file'
+): void {
+  const linkPath = fixtureAbsolutePath(rootName, linkRelative);
+  fs.mkdirSync(path.dirname(linkPath), { recursive: true });
+  fs.symlinkSync(
+    fixtureAbsolutePath(rootName, targetRelative),
+    linkPath,
+    type === 'dir' ? 'dir' : 'file'
+  );
+}

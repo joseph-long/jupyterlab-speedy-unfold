@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-speedy-unfold",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A vscode-like file browser",
   "keywords": [
     "jupyter",
@@ -106,7 +106,7 @@
     "extension": true,
     "outputDir": "jupyterlab_speedy_unfold/labextension",
     "_build": {
-      "load": "static/remoteEntry.eaf2ba7b28f12f27debb.js",
+      "load": "static/remoteEntry.298d6817f42505daee63.js",
       "extension": "./extension",
       "style": "./style"
     }

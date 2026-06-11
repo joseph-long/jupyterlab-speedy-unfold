@@ -143,11 +143,24 @@ def _list_directory(contents_manager, api_path: str) -> list[dict]:
             if not contents_manager.allow_hidden and name.startswith("."):
                 continue
 
+            is_symlink = _entry_is_symlink(entry)
             entry_type = _entry_type(entry)
+            is_broken_symlink = is_symlink and entry_type is None
             if entry_type is None:
-                continue
+                if not is_broken_symlink:
+                    continue
+                entry_type = "file"
 
-            model = _entry_model(name, child_path, entry_type, parent_writable)
+            symlink_target = _entry_symlink_target(entry) if is_symlink else None
+            model = _entry_model(
+                name,
+                child_path,
+                entry_type,
+                parent_writable,
+                is_symlink,
+                symlink_target,
+                is_broken_symlink,
+            )
             if entry_type == "directory":
                 directories.append(model)
             else:
@@ -159,14 +172,39 @@ def _list_directory(contents_manager, api_path: str) -> list[dict]:
 
 
 def _entry_type(entry: os.DirEntry) -> str | None:
-    if entry.is_dir(follow_symlinks=False):
-        return "directory"
-    if entry.is_file(follow_symlinks=False):
-        return "file"
+    try:
+        if entry.is_dir():
+            return "directory"
+        if entry.is_file():
+            return "file"
+    except OSError:
+        return None
     return None
 
 
-def _entry_model(name: str, path: str, entry_type: str, writable: bool) -> dict:
+def _entry_is_symlink(entry: os.DirEntry) -> bool:
+    try:
+        return entry.is_symlink()
+    except OSError:
+        return False
+
+
+def _entry_symlink_target(entry: os.DirEntry) -> str | None:
+    try:
+        return os.readlink(entry.path)
+    except OSError:
+        return None
+
+
+def _entry_model(
+    name: str,
+    path: str,
+    entry_type: str,
+    writable: bool,
+    is_symlink: bool,
+    symlink_target: str | None,
+    is_broken_symlink: bool,
+) -> dict:
     return {
         "name": name,
         "path": path,
@@ -177,7 +215,10 @@ def _entry_model(name: str, path: str, entry_type: str, writable: bool) -> dict:
         "content": None,
         "format": None,
         "mimetype": None,
-        "size": None
+        "size": None,
+        "is_symlink": is_symlink,
+        "symlink_target": symlink_target,
+        "is_broken_symlink": is_broken_symlink
     }
 
 

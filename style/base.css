@@ -5,7 +5,7 @@
 .jp-DirListing-item {
   flex-grow: 1;
   display: flex;
-  padding-left: calc(var(--jp-unfold-depth, 0) * var(--indent));
+  padding-left: calc(3px + var(--jp-unfold-depth, 0) * var(--indent));
 }
 
 .jp-DirListing-itemName {
@@ -25,4 +25,44 @@
 
 .jp-mod-unfold-virtualized .jp-DirListing-content {
   overflow-anchor: none;
+}
+
+/* Symlink indicator: subtle italic name + small arrow chip on the icon.
+   Colors come from JupyterLab theme variables so light and dark modes
+   both pick up appropriate contrast automatically. */
+.jp-DirListing-item[data-is-symlink='true'] .jp-DirListing-itemText {
+  font-style: italic;
+}
+
+.jp-DirListing-item[data-is-symlink='true'] .jp-DirListing-itemIcon {
+  position: relative;
+}
+
+.jp-DirListing-item[data-is-symlink='true'] .jp-DirListing-itemIcon::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background-color: var(--jp-content-link-color);
+  box-shadow: 0 0 0 1.5px var(--jp-layout-color1);
+  pointer-events: none;
+
+  /* Inline SVG arrow tinted to layout color1; sized to match the chip. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M4 8.2L8 4.2M5 4h3v3' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 9px 9px;
+}
+
+/* Broken symlink: orange chip + strikethrough name. Uses JupyterLab's warn
+   color so it stays legible under both light and dark themes. */
+.jp-DirListing-item[data-symlink-broken='true'] .jp-DirListing-itemText {
+  text-decoration: line-through;
+}
+
+.jp-DirListing-item[data-symlink-broken='true'] .jp-DirListing-itemIcon::after {
+  background-color: var(--jp-warn-color1);
 }

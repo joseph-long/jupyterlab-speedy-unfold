@@ -78,6 +78,8 @@ interface IItemNodeRefs {
   fileSizeContainer: HTMLElement | null;
   lastIconKey?: string;
   lastDepth?: number;
+  lastIsSymlink?: boolean;
+  lastSymlinkBroken?: boolean;
 }
 
 interface ICachedItemNode extends HTMLElement {
@@ -251,7 +253,18 @@ export class FileTreeRenderer extends DirListing.Renderer {
       fileSizeContainer.textContent = '';
     }
 
-    node.title = `Name: ${model.name}`;
+    const extended = model as {
+      is_symlink?: boolean;
+      symlink_target?: string | null;
+      is_broken_symlink?: boolean;
+    };
+    const isSymlink = !!extended.is_symlink;
+    const isBrokenSymlink = !!extended.is_broken_symlink;
+    const symlinkTarget = isSymlink ? extended.symlink_target ?? null : null;
+
+    node.title = isSymlink
+      ? `→ ${symlinkTarget ?? '(unreadable target)'}`
+      : `Name: ${model.name}`;
     node.setAttribute(
       'data-file-type',
       model.type === 'directory' ? 'directory' : 'file'
@@ -261,6 +274,24 @@ export class FileTreeRenderer extends DirListing.Renderer {
       node.setAttribute('data-is-dot', 'true');
     } else {
       node.removeAttribute('data-is-dot');
+    }
+
+    if (refs.lastIsSymlink !== isSymlink) {
+      if (isSymlink) {
+        node.setAttribute('data-is-symlink', 'true');
+      } else {
+        node.removeAttribute('data-is-symlink');
+      }
+      refs.lastIsSymlink = isSymlink;
+    }
+
+    if (refs.lastSymlinkBroken !== isBrokenSymlink) {
+      if (isBrokenSymlink) {
+        node.setAttribute('data-symlink-broken', 'true');
+      } else {
+        node.removeAttribute('data-symlink-broken');
+      }
+      refs.lastSymlinkBroken = isBrokenSymlink;
     }
 
     const iconKey =
@@ -426,6 +457,10 @@ export class DirTreeListing extends DirListing {
 
   private async _eventDblClick(event: MouseEvent): Promise<void> {
     const entry = this.entryForClick(event);
+
+    if (entry && (entry as { is_broken_symlink?: boolean }).is_broken_symlink) {
+      return;
+    }
 
     if (entry?.type === 'directory') {
       if (!this._singleClickToUnfold) {
