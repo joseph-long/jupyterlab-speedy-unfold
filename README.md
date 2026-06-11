@@ -4,9 +4,11 @@
 [![Github Actions Status](https://github.com/joseph-long/jupyterlab-speedy-unfold/actions/workflows/build.yml/badge.svg)](https://github.com/joseph-long/jupyterlab-speedy-unfold/actions?query=workflow%3ABuild)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/joseph-long/jupyterlab-speedy-unfold/main?urlpath=lab)
 [![PyPI](https://img.shields.io/pypi/v/jupyterlab-speedy-unfold)](https://pypi.org/project/jupyterlab-speedy-unfold/)
-[![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/jupyterlab-speedy-unfold)](https://anaconda.org/conda-forge/jupyterlab-speedy-unfold)
 
-An IDE-like file browser
+An IDE-like file browser with some profiling and optimization for folders with huge numbers of files. Tries to be economical in use of DOM elements, `stat()`ing only where necessary, etc.
+
+Originally forked from https://github.com/jupyterlab-contrib/jupyterlab-unfold for our own particular use case in [MagAO-X](https://magao-x.org). They in turn acknowledge inspiration from [youngthejames/jupyterlab_filetree](https://github.com/youngthejames/jupyterlab_filetree).
+
 
 ![jupyterlab-speedy-unfold](https://raw.githubusercontent.com/joseph-long/jupyterlab-speedy-unfold/main/images/screenshot.png)
 
@@ -85,7 +87,3 @@ pip uninstall jupyterlab-speedy-unfold
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `jupyterlab-speedy-unfold` within that folder.
-
-## Acknowledgement
-
-This extension was inspired from https://github.com/youngthejames/jupyterlab_filetree, but the code reuses the core-JupyterLab filebrowser and replaces it by default.
