@@ -13,10 +13,14 @@
     },
     "license": "BSD-3-Clause",
     "author": {
-        "name": "Martin Renou",
-        "email": "martin.renou@gmail.com"
+        "name": "Joseph D. Long",
+        "email": "git@joseph-long.com"
     },
     "contributors": [
+        {
+            "name": "Martin Renou",
+            "email": "martin.renou@gmail.com"
+        },
         {
             "name": "Frédéric Collonval"
         }
