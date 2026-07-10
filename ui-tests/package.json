@@ -14,5 +14,8 @@
   "devDependencies": {
     "@jupyterlab/galata": "^5.0.5",
     "@playwright/test": "^1.49"
+  },
+  "resolutions": {
+    "@playwright/test": "1.60.0"
   }
 }

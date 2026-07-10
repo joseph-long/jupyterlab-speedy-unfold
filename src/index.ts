@@ -9,7 +9,11 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -18,6 +22,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { IStateDB } from '@jupyterlab/statedb';
 
 import { FileTreeBrowser, FilterFileTreeBrowserModel } from './unfold';
+
+import { PathBar } from './widgets/PathBar';
 
 const SETTINGS_ID =
   'jupyterlab-speedy-unfold:jupyterlab-speedy-unfold-settings';
@@ -96,6 +102,72 @@ const fileBrowserFactory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   }
 };
 
+/**
+ * A widget extension that inserts a full-width {@link PathBar} directly above
+ * the content of any document widget (notebook, text editor, image viewer,
+ * CSV, ...).
+ *
+ * A single instance is registered against every concrete widget factory (see
+ * {@link pathBar}); each document type derives from `DocumentWidget`
+ * (a `MainAreaWidget`) and exposes a `context` carrying `path` / `pathChanged`.
+ */
+class PathBarExtension
+  implements
+    DocumentRegistry.IWidgetExtension<IDocumentWidget, DocumentRegistry.IModel>
+{
+  createNew(
+    widget: IDocumentWidget,
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ): IDisposable {
+    const bar = new PathBar(context);
+
+    // `MainAreaWidget.contentHeader` is a BoxPanel purpose-built for widgets
+    // that sit between the toolbar and the content, so the bar lands directly
+    // above the editor/viewer without any layout-index assumptions.
+    if (widget instanceof MainAreaWidget) {
+      widget.contentHeader.addWidget(bar);
+    } else {
+      // No known place to attach the bar; drop it rather than leak the node.
+      bar.dispose();
+    }
+
+    return new DisposableDelegate(() => {
+      bar.dispose();
+    });
+  }
+}
+
+/**
+ * Plugin adding the path bar above every document widget's content.
+ *
+ * The document registry has no `'*'` wildcard for widget extensions: they are
+ * stored and looked up per concrete (lowercased) factory name. Register the
+ * extension against every existing factory, and against any added later.
+ */
+const pathBar: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterlab-speedy-unfold:path-bar',
+  description: "Show the document's path above the content editor/viewer.",
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    const { docRegistry } = app;
+    const extension = new PathBarExtension();
+
+    for (const factory of docRegistry.widgetFactories()) {
+      docRegistry.addWidgetExtension(factory.name, extension);
+    }
+
+    docRegistry.changed.connect((_, args) => {
+      if (
+        args.type === 'widgetFactory' &&
+        args.change === 'added' &&
+        args.name
+      ) {
+        docRegistry.addWidgetExtension(args.name, extension);
+      }
+    });
+  }
+};
+
 export * from './unfold';
 
-export default fileBrowserFactory;
+export default [fileBrowserFactory, pathBar];

@@ -66,3 +66,72 @@
 .jp-DirListing-item[data-symlink-broken='true'] .jp-DirListing-itemIcon::after {
   background-color: var(--jp-warn-color1);
 }
+
+/* Path bar: a full-width bar above document content showing the doc's path,
+   with an expandable absolute-prefix toggle and a copy button. */
+.jp-jupyterlab-ext-pathbar-bar {
+  /*
+   * The bar lives in a MainAreaWidget contentHeader, a Lumino BoxPanel that
+   * sizes its children from the node's computed min/max limits rather than CSS
+   * flexbox. Without an explicit min-height the bar collapses to a few pixels,
+   * so set one (padding + a line of text) via box-sizing.
+   */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 6px;
+  line-height: 16px;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+  background: var(--jp-layout-color1);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+/* Leading, icon-only copy button (before the prefix and path). */
+.jp-jupyterlab-ext-pathbar-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-right: 4px;
+  padding: 2px;
+  border: none;
+  border-radius: var(--jp-border-radius);
+  background: none;
+  cursor: pointer;
+}
+
+.jp-jupyterlab-ext-pathbar-button:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-jupyterlab-ext-pathbar-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The `.../` (or expanded) absolute-prefix toggle. */
+.jp-jupyterlab-ext-pathbar-prefix {
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--jp-ui-font-color2);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.jp-jupyterlab-ext-pathbar-prefix:hover {
+  color: var(--jp-ui-font-color1);
+  text-decoration: underline;
+}
+
+/* The relative path; grows to fill and truncates with an ellipsis. */
+.jp-jupyterlab-ext-pathbar-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
