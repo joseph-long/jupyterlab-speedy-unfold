@@ -128,3 +128,4 @@ dmypy.json
 
 .agent-context/
 .venv/
+jupyterlab_speedy_unfold/_version.py
